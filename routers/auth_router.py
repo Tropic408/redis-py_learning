@@ -17,7 +17,7 @@ from repository.user_repo import EmailCodeRepository,UserRepository
 from schemas import ResponseOut
 from schemas.user_schemas import RegisterIn, UserCreateSchema, LoginIn, LoginOut
 
-from core.redis import redis_client
+from core.redis_client import redis_client
 router = APIRouter(prefix="/auth",tags=["user"])
 
 @router.get("/code",response_model=ResponseOut)

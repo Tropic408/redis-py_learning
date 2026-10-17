@@ -1,4 +1,6 @@
 import asyncio
+import hashlib
+import json
 import os
 import re
 from pathlib import Path
@@ -8,8 +10,11 @@ from langchain_deepseek import ChatDeepSeek
 from langchain_ollama import ChatOllama
 from pydantic import SecretStr
 
+from core.redis_client import redis_client
 from schemas.agent import BodyInfoResultSchema
 from schemas.body_info import PlanIn
+
+from schemas.body_info import PlanOut
 
 load_dotenv(Path(__file__).resolve().parent.parent/ ".env")
 
@@ -22,8 +27,9 @@ load_dotenv(Path(__file__).resolve().parent.parent/ ".env")
 
 #本地ollama调用
 llm = ChatOllama(
-    model = "deepseek-r1:7b",
+    model = "qwen3.5:9B",
     temperature = 1,
+    reasoning=False,
 )
 
 System_prompt="""
@@ -87,24 +93,24 @@ async def generate_plan(plan_info:PlanIn)->BodyInfoResultSchema:
 
 
 #测试
-# async def main():
-#     body_info=PlanIn(
-#         gender="男",
-#         height=175,
-#         weight=65.5,
-#         age=19,
-#         demand="我身边的器材只有哑铃，健腹轮，弹力带"
-#     )
-#     plans = await generate_plan(body_info)
-#     print("===== AI 健身方案 =====")
-#     for index, plan in enumerate(plans.plans, start=1):
-#         print(f"\n--- 方案 {index} ---")
-#         print(f"BMI: {plan.bmi}")
-#         print(f"\n计划表:\n{plan.plan}")
-#         print(f"\n目标:\n{plan.goal}")
-#         print(f"\n计划理由:\n{plan.reason}")
-#         print(f"\n饮食建议:\n{plan.food_suggestion}")
-#         print(f"\n休息建议:\n{plan.rest}")
+async def main():
+    body_info=PlanIn(
+        gender="男",
+        height=175,
+        weight=65.5,
+        age=19,
+        demand="我身边的器材只有哑铃，健腹轮，弹力带"
+    )
+    plans = await generate_plan(body_info)
+    print("===== AI 健身方案 =====")
+    for index, plan in enumerate(plans.plans, start=1):
+        print(f"\n--- 方案 {index} ---")
+        print(f"BMI: {plan.bmi}")
+        print(f"\n计划表:\n{plan.plan}")
+        print(f"\n目标:\n{plan.goal}")
+        print(f"\n计划理由:\n{plan.reason}")
+        print(f"\n饮食建议:\n{plan.food_suggestion}")
+        print(f"\n休息建议:\n{plan.rest}")
 
-# if __name__ == "__main__":
-#     asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
